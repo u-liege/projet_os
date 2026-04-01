@@ -48,8 +48,53 @@ size_t get_used_space(){
 
 void* balloc(size_t size) {
     // Implement this function to allocate a chunk of memory of given size using the buddy allocator
-    return NULL;
+
+    if(size == 0 || size > MAX_ALLOC_SIZE){
+        return NULL;
+    }
+   
+    size_t rounded = round_up_power2(size);
+    int needed_level = size_to_level(rounded);
+
+    int found_level = -1;
+    for(int size == 0 || size > MAX_ALLOC_SIZE ){
+        if (a.free_lists[lvl] != NULL) {
+            found_level = lvl;
+            break;
+        }
+    }
+    if (found_level == -1) {
+        return NULL; 
+    }
+
+    while(found_level > needed_level){
+
+        freeNode* block = a.free_lists[found_level];
+        a.free_lists[found_level] = block-> next;
+
+        found_level--; 
+
+        size_t half_size = level_to_size(found_level);
+
+        void* right =(void*)((size_t)block + half_size);
+        void* left = (void*)block;
+
+        insert_free_block(found_level, right);
+        insert_free_block(found_level,left); 
+    }
+
+    freeNode* allocated = a.free_lists[needed_level];
+    a.free_lists[needed_level] = allocated->next;
+
+    size_t idx = ptr_to_block_index((void*)allocated);
+    a.block_levels[idx] = needed_level;
+
+    a.used_space += level_to_size(needed_level);
+ 
+    return (void*)allocated;
+
 }
+
 
 void bfree(void* ptr) {
     // Implement this function to deallocate a previously allocated chunk of memory using the buddy allocator
