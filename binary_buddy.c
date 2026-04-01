@@ -53,6 +53,32 @@ void* balloc(size_t size) {
 
 void bfree(void* ptr) {
     // Implement this function to deallocate a previously allocated chunk of memory using the buddy allocator
+
+    if (ptr == NULL){
+        Return; 
+    }
+
+    size_t idx = ptr_to_block_index(ptr);
+    int level = a.block_levels[idx];
+
+    a.used_space -= level_to_size(level);
+
+    while (level < NUM_LEVELS -1){
+
+        void* buddy = buddy_of(ptr, level); 
+
+        if (!remove_free_block(level, buddy)) {
+            break; 
+        }
+        
+        if (buddy < ptr){
+            ptr = buddy;
+        }
+
+        level++;
+
+    }
+    insert_free_block(level, ptr);
 }
 
 static int init_structures(const void* memory_base, size_t size){
