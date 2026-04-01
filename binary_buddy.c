@@ -46,6 +46,71 @@ size_t get_used_space(){
 
 // ------------------- END PROTECTED CODE -------------------
 
+static size_t level_to_size(int level) {
+    return (size_t)1 << (MIN_ALLOC_SIZE_BITS + level);
+}
+ 
+static int size_to_level(size_t size) {
+    int level = 0;
+    size_t s = MIN_ALLOC_SIZE;
+    while (s < size) {
+        s <<= 1;
+        level++;
+    }
+    return level;
+}
+ 
+static size_t round_up_power2(size_t size) {
+    if (size < MIN_ALLOC_SIZE) size = MIN_ALLOC_SIZE;
+    size_t s = MIN_ALLOC_SIZE;
+    while (s < size) {
+        s <<= 1;
+    }
+    return s;
+}
+ 
+static size_t ptr_to_offset(const void* ptr) {
+    return (size_t)ptr - (size_t)a.base;
+}
+ 
+static void* offset_to_ptr(size_t offset) {
+    return (void*)((size_t)a.base + offset);
+}
+ 
+static size_t ptr_to_block_index(const void* ptr) {
+    return ptr_to_offset(ptr) / MIN_ALLOC_SIZE;
+}
+ 
+static void insert_free_block(int level, void* ptr) {
+    FreeNode* node = (FreeNode*)ptr;
+    FreeNode** curr = &a.free_lists[level];
+ 
+    while (*curr != NULL && (void*)(*curr) < ptr) {
+        curr = &(*curr)->next;
+    }
+    node->next = *curr;
+    *curr = node;
+}
+ 
+static int remove_free_block(int level, void* ptr) {
+    FreeNode** curr = &a.free_lists[level];
+ 
+    while (*curr != NULL) {
+        if ((void*)(*curr) == ptr) {
+            *curr = (*curr)->next;
+            return 1;
+        }
+        curr = &(*curr)->next;
+    }
+    return 0;
+}
+ 
+static void* buddy_of(void* ptr, int level) {
+    size_t offset = ptr_to_offset(ptr);
+    size_t size   = level_to_size(level);
+    size_t buddy_offset = offset ^ size; 
+    return offset_to_ptr(buddy_offset);
+}
 void* balloc(size_t size) {
     // Implement this function to allocate a chunk of memory of given size using the buddy allocator
 

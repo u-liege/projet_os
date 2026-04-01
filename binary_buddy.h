@@ -6,6 +6,12 @@
 #include "buddy_size.h"
 
 // You can add code/struct here if needed
+typedef struct FreeNode{
+    struct FreeNode* next;
+
+}FreeNode;
+
+#define NUM_LEVELS (MAX_ALLOC_SIZE_BITS - MIN_ALLOC_SIZE_BITS + 1)
 
 // ------------------- START PROTECTED CODE -------------------
 
@@ -46,6 +52,11 @@ typedef struct {
 // ------------------- END PROTECTED CODE -------------------
 
     // Add some fields here
+    FreeNode* free_lists[NUM_LEVELS];
+
+    int* block_levels;
+
+    size_t num_min_blocks;
 
 } Allocator; // Cannot modify the name of this struct, but you can add fields to it
 
