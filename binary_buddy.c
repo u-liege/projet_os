@@ -169,9 +169,20 @@ void bfree(void* ptr) {
     }
 
     size_t idx = ptr_to_block_index(ptr);
+    if (idx >= a.num_min_blocks) {
+        return;
+    }
     int level = a.block_levels[idx];
 
+    if (level == -1) {
+        return;
+    }
+
+    a.block_levels[idx] = -1;
+
     a.used_space -= level_to_size(level);
+
+     
 
     while (level < NUM_LEVELS -1){
 
