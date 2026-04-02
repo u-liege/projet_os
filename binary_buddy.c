@@ -122,7 +122,7 @@ void* balloc(size_t size) {
     int needed_level = size_to_level(rounded);
 
     int found_level = -1;
-    for(int size == 0 || size > MAX_ALLOC_SIZE ){
+    for (int lvl = needed_level; lvl < NUM_LEVELS; lvl++){
         if (a.free_lists[lvl] != NULL) {
             found_level = lvl;
             break;
@@ -134,7 +134,7 @@ void* balloc(size_t size) {
 
     while(found_level > needed_level){
 
-        freeNode* block = a.free_lists[found_level];
+        FreeNode* block = a.free_lists[found_level];
         a.free_lists[found_level] = block-> next;
 
         found_level--; 
@@ -148,7 +148,7 @@ void* balloc(size_t size) {
         insert_free_block(found_level,left); 
     }
 
-    freeNode* allocated = a.free_lists[needed_level];
+    FreeNode* allocated = a.free_lists[needed_level];
     a.free_lists[needed_level] = allocated->next;
 
     size_t idx = ptr_to_block_index((void*)allocated);
@@ -165,7 +165,7 @@ void bfree(void* ptr) {
     // Implement this function to deallocate a previously allocated chunk of memory using the buddy allocator
 
     if (ptr == NULL){
-        Return; 
+        return; 
     }
 
     size_t idx = ptr_to_block_index(ptr);
